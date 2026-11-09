@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F8DCE6">
+<title>感情观契合度测试 · 你们合得来吗</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23F8DCE6'/%3E%3Ccircle cx='32' cy='32' r='16' fill='none' stroke='%23C9A063' stroke-width='6'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --gold:#C9A063; --gold-deep:#B08A4F; --gold-soft:#E8D3A8;
+    --pink:#F8DCE6; --pink-soft:#FCEEF3; --pink-deep:#EBA9C2;
+    --ink:#5C4A52; --ink-soft:#9A8590; --bg:#FFF8F2;
+    --card:#FFFFFF; --line:#F0E2D6;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(115% 78% at 12% 8%, rgba(255,186,120,.38) 0%, rgba(255,186,120,0) 58%),
+      radial-gradient(108% 74% at 92% 22%, rgba(255,158,190,.36) 0%, rgba(255,158,190,0) 60%),
+      radial-gradient(120% 88% at 78% 96%, rgba(255,214,120,.34) 0%, rgba(255,214,120,0) 62%),
+      linear-gradient(155deg, #FFF3E2 0%, #FFE7EE 48%, #FFF6E4 100%);
+    color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    min-height:100vh; min-height:100dvh; -webkit-font-smoothing:antialiased;
+  }
+  #app{max-width:480px; margin:0 auto; padding:18px 18px 40px; min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .brand{font-size:13px; letter-spacing:2px; color:var(--gold-deep); font-weight:600;}
+  .view{flex:1; display:flex; flex-direction:column; justify-content:center;}
+  #share,#result{justify-content:flex-start;}
+  .hidden{display:none !important;}
+
+  .home-title{font-size:30px; font-weight:800; text-align:center; margin:10px 0 6px; line-height:1.32;}
+  .home-sub{text-align:center; color:var(--ink-soft); font-size:14px; margin-bottom:22px; line-height:1.7;}
+  .steps-card{background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:14px 16px; margin-bottom:16px; box-shadow:0 4px 14px rgba(201,160,99,.08);}
+  .step{display:flex; align-items:center; gap:12px; font-size:14px; color:var(--ink); padding:6px 0;}
+  .step b{flex:0 0 24px; width:24px; height:24px; border-radius:50%; background:var(--pink-soft); color:var(--gold-deep); font-size:13px; display:flex; align-items:center; justify-content:center;}
+  .dim-chips{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:22px;}
+  .dim-chips span{background:var(--pink-soft); border:1px solid var(--line); color:var(--gold-deep); font-size:12px; padding:6px 11px; border-radius:20px;}
+  .peer-tip{background:var(--pink-soft); border:1.5px solid var(--gold-soft); border-radius:16px; padding:16px; font-size:14px; line-height:1.7; color:var(--ink); text-align:center; margin-bottom:20px;}
+  .start-btn{width:100%; border:none; border-radius:16px; padding:16px; font-size:17px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--gold),var(--gold-deep)); box-shadow:0 6px 16px rgba(176,138,79,.35); cursor:pointer;}
+  .start-btn:active{transform:scale(.98);}
+  .home-tip{text-align:center; font-size:12px; color:var(--ink-soft); margin-top:16px; line-height:1.75;}
+
+  .quiz-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .quiz-back{font-size:13px; color:var(--gold-deep); cursor:pointer; background:none; border:none; padding:4px 0;}
+  .quiz-prog{font-size:13px; color:var(--ink-soft);}
+  .quiz-dim{font-size:12px; color:var(--gold-deep); font-weight:600; text-align:center; margin-bottom:10px; letter-spacing:1px;}
+  .bar{height:8px; background:var(--pink); border-radius:6px; overflow:hidden; margin:8px 0 24px;}
+  .bar > i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--gold-soft),var(--gold)); border-radius:6px; transition:width .3s;}
+  .q-index{font-size:13px; color:var(--gold-deep); font-weight:700; letter-spacing:1px;}
+  .q-text{font-size:20px; font-weight:700; line-height:1.6; margin:8px 0 22px;}
+  .opt{background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:14px; margin-bottom:11px; font-size:14.5px; cursor:pointer; display:flex; align-items:center; gap:12px; transition:.12s; color:var(--ink); box-shadow:0 3px 10px rgba(201,160,99,.06); line-height:1.5;}
+  .opt:active{transform:scale(.985); border-color:var(--gold); background:var(--pink-soft);}
+  .opt .dot{flex:0 0 24px; width:24px; height:24px; border-radius:50%; border:1.5px solid var(--gold-soft); color:var(--gold-deep); font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center;}
+
+  .s-head{text-align:center; font-size:23px; font-weight:800; margin:14px 0 4px;}
+  .s-sub{text-align:center; font-size:13.5px; color:var(--ink-soft); margin-bottom:18px;}
+  .tend-row{display:flex; justify-content:space-between; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:8px; font-size:14px;}
+  .tend-name{color:var(--ink);}
+  .tend-val{color:var(--gold-deep); font-weight:700; font-size:13px;}
+  .link-card{background:linear-gradient(135deg,#FFF1F6,#FCEEF3); border:1.5px solid var(--gold-soft); border-radius:18px; padding:18px; margin:18px 0 10px;}
+  .link-card h4{margin:0 0 6px; font-size:16px; color:var(--gold-deep);}
+  .link-card p{font-size:13px; line-height:1.65; color:var(--ink); margin:0 0 12px;}
+  .link-box{background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px; font-size:11px; color:var(--ink-soft); word-break:break-all; line-height:1.6; user-select:all; -webkit-user-select:all;}
+  .btn-copy{width:100%; margin-top:10px; border:none; border-radius:14px; padding:13px; font-size:16px; font-weight:700; color:#fff; background:linear-gradient(135deg,var(--gold),var(--gold-deep)); cursor:pointer;}
+  .btn-copy:active{transform:scale(.98);}
+  .s-tip{text-align:center; font-size:13px; color:var(--gold-deep); min-height:20px; margin:8px 0;}
+  .btn-plain{display:block; margin:6px auto 0; background:none; border:none; color:var(--ink-soft); font-size:13px; text-decoration:underline; cursor:pointer;}
+
+  .r-who{text-align:center; font-size:12px; color:var(--gold-deep); font-weight:600; letter-spacing:1px; margin:10px 0 6px;}
+  .ring-wrap{display:flex; justify-content:center; margin:6px 0 4px;}
+  .ring{position:relative; width:180px; height:180px;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .track{stroke:var(--pink);}
+  .ring .fill{stroke:url(#rg); stroke-linecap:round; transition:stroke-dasharray 1s ease;}
+  .ring .num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring .pct{font-size:50px; font-weight:800; color:var(--gold-deep); line-height:1;}
+  .ring .pct small{font-size:21px; margin-left:2px;}
+  .ring .cap{font-size:12px; color:var(--ink-soft); margin-top:6px; letter-spacing:1px;}
+  .r-name{font-size:24px; font-weight:800; text-align:center; margin:12px 0 2px; line-height:1.35;}
+  .r-tag{text-align:center; font-size:14px; color:var(--gold-deep); font-weight:600; margin-bottom:16px;}
+  .r-block{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:15px 18px; margin-bottom:12px; box-shadow:0 4px 14px rgba(201,160,99,.08);}
+  .r-block h4{margin:0 0 10px; font-size:15px; color:var(--gold-deep);}
+  .r-block p{margin:0; font-size:14px; line-height:1.7; color:var(--ink);}
+  .r-duo{background:linear-gradient(135deg,#FFF1F6,#FCEEF3); border:1.5px solid var(--gold-soft);}
+  .dim-bar-row{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px;}
+  .dim-bar-row:last-child{margin-bottom:0;}
+  .dim-bar-name{flex:0 0 78px; color:var(--ink);}
+  .dim-bar-track{flex:1; height:9px; background:var(--pink); border-radius:6px; overflow:hidden;}
+  .dim-bar-track i{display:block; height:100%; background:linear-gradient(90deg,var(--gold-soft),var(--gold)); border-radius:6px;}
+  .dim-bar-num{flex:0 0 38px; text-align:right; color:var(--gold-deep); font-weight:700;}
+  .cmp-item{border-top:1px dashed var(--line); padding:10px 0; font-size:13px; line-height:1.6;}
+  .cmp-item:first-child{border-top:none; padding-top:0;}
+  .cmp-q{font-weight:700; color:var(--ink);}
+  .cmp-a{color:var(--ink-soft); font-size:12.5px; margin-top:4px;}
+  .r-quote{text-align:center; font-size:16px; font-weight:700; color:var(--ink); line-height:1.7; margin:16px 6px 20px;}
+  .r-actions{display:flex; gap:12px;}
+  .btn{flex:1; border:none; border-radius:16px; padding:15px; font-size:16px; font-weight:700; cursor:pointer;}
+  .btn-share{background:linear-gradient(135deg,var(--gold),var(--gold-deep)); color:#fff; box-shadow:0 6px 16px rgba(176,138,79,.35);}
+  .btn-again{background:#fff; color:var(--gold-deep); border:1.5px solid var(--gold);}
+  .btn:active{transform:scale(.97);}
+  footer{text-align:center; font-size:11px; color:var(--ink-soft); margin-top:26px; line-height:1.6;}
+  .wm{position:fixed; right:14px; bottom:calc(10px + env(safe-area-inset-bottom)); font-size:11px; letter-spacing:1px; color:var(--gold-deep); opacity:.62; pointer-events:none; user-select:none; -webkit-user-select:none; z-index:5;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar"><span class="brand">感情观契合度测试</span></div>
+
+  <!-- HOME -->
+  <section class="view" id="home">
+    <h1 class="home-title" id="homeTitle">你们的感情观<br>合得来吗？</h1>
+    <p class="home-sub" id="homeSub">20 道题，不评判对错<br>只看看两个人的想法差在哪</p>
+    <div class="steps-card" id="stepsCard">
+      <div class="step"><b>1</b><span>你先答 20 题，看看自己的倾向</span></div>
+      <div class="step"><b>2</b><span>生成一条链接，发给 TA</span></div>
+      <div class="step"><b>3</b><span>TA 答完，一起看契合度</span></div>
+    </div>
+    <div class="peer-tip hidden" id="peerTip">TA 的答案已经在这条链接里了。<br>你答完同一套 20 题，就能看到你们的契合度。</div>
+    <div class="dim-chips" id="homeDims"></div>
+    <button class="start-btn" id="startBtn">开始测试</button>
+    <p class="home-tip">答案只写进链接里，不上传、不留痕<br>两个人答的是同一套题，才比得出来 · 娱乐参考</p>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="view hidden" id="quiz">
+    <div class="quiz-head">
+      <button class="quiz-back" id="backBtn">← 返回</button>
+      <span class="quiz-prog" id="prog">第 1 / 20 题</span>
+    </div>
+    <div class="quiz-dim" id="qDim">联系与空间</div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="q-index" id="qIndex">QUESTION 01</div>
+    <div class="q-text" id="qText"></div>
+    <div id="optList"></div>
+  </section>
+
+  <!-- SHARE：第一个人答完 -->
+  <section class="view hidden" id="share">
+    <div class="s-head">你的答案打包好了</div>
+    <p class="s-sub">先看看你在 5 个维度上的倾向</p>
+    <div id="tendList"></div>
+    <div class="link-card">
+      <h4>把这条链接发给 TA</h4>
+      <p>TA 打开后答同一套题，答完就能看到你们的契合度。答案只在这条链接里，不会上传。</p>
+      <div class="link-box" id="linkBox"></div>
+      <button class="btn-copy" id="copyBtn">复制链接</button>
+    </div>
+    <p class="s-tip" id="copyTip"></p>
+    <button class="btn-plain" id="againFromShare">重新测一次</button>
+  </section>
+
+  <!-- RESULT：第二个人答完 -->
+  <section class="view hidden" id="result">
+    <div class="r-who">你们的契合度</div>
+    <div class="ring-wrap">
+      <div class="ring">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#E8D3A8"/><stop offset="1" stop-color="#C9A063"/>
+          </linearGradient></defs>
+          <circle class="track" cx="90" cy="90" r="79" fill="none" stroke-width="14"/>
+          <circle class="fill" id="ringFill" cx="90" cy="90" r="79" fill="none" stroke-width="14" stroke-dasharray="0 497"/>
+        </svg>
+        <div class="num"><div class="pct"><span id="rPct">0</span><small>%</small></div><div class="cap">感情观契合度</div></div>
+      </div>
+    </div>
+    <div class="r-name" id="rName"></div>
+    <div class="r-tag" id="rTag"></div>
+    <div class="r-block"><h4>五个维度，合在哪</h4><div id="dimBars"></div></div>
+    <div class="r-block"><p id="rAdvice"></p></div>
+    <div class="r-block"><h4 id="sameTitle">想到一块去的</h4><div id="sameList"></div></div>
+    <div class="r-block r-duo"><h4 id="diffTitle">值得好好聊的</h4><div id="diffList"></div></div>
+    <div class="r-quote" id="rQuote"></div>
+    <div class="r-actions">
+      <button class="btn btn-share" id="shareBtn">保存结果图</button>
+      <button class="btn btn-again" id="againBtn">换我发起一次</button>
+    </div>
+  </section>
+
+  <footer>合得来是运气，聊得开是本事 · 恋爱自测系列</footer>
+  <div class="wm">小红书@异地恋快快走</div>
+</div>
+
+<script>
+  /* ---------- 20 题 · 5 维度 × 4 题 ----------
+     中肯自陈题：每题陈述一种相处偏好，A→D 是「很认同 → 完全不认同」，
+     没有对错，也不设极端情境。dir=1 表示认同该陈述偏「亲密/确认/投入」，
+     dir=-1 表示偏「独立/松弛/顺其自然」，用于算维度倾向；
+     契合度只用两人逐题选项序号之差，与 dir 无关。 */
+  var QUIZ = [
+    {q:"每天固定聊一阵，比想到才聊更让我踏实", dim:1, dir:1, o:["就是这样，有个固定时间才安心","大体是，但偶尔随性也行","不太是，我更喜欢想到就聊","完全不是，随时随性才舒服"]},
+    {q:"各自忙的时候半天不回消息，不必特意说明", dim:1, dir:-1, o:["完全同意，各自忙不用交代","大体是，晚点回也没关系","有点介意，简单说一声更好","不太行，我会一直惦记着"]},
+    {q:"异地时各自保留完整的社交和爱好，不用什么都一起", dim:1, dir:-1, o:["很认同，各有各的生活更好","比较认同，但大事还是想同步","有点不认同，会希望多参与","不太认同，我更想融进彼此日常"]},
+    {q:"睡前那通道语音或视频，对我来说挺重要", dim:1, dir:1, o:["很重要，少了会觉得空落落","挺重要的，尽量都留着","可有可无，困了就先睡","完全不需要，各睡各的就好"]},
+
+    {q:"有不满我倾向当场说清楚，放着会更难受", dim:2, dir:1, o:["对，当场讲开我才睡得着","大体是，不过会挑个时机","不太是，我习惯先自己消化","完全不是，隔天再说更稳妥"]},
+    {q:"吵完各自冷静一会儿再聊，比立刻讲道理更有效", dim:2, dir:-1, o:["很认同，冷静完才说得清","比较认同，缓一缓挺好","有点不认同，晾着会更慌","不太认同，我更想马上聊开"]},
+    {q:"过去的事翻篇就好，不太需要反复提", dim:2, dir:-1, o:["很认同，翻旧账最伤感情","比较认同，提一次就够了","有点不认同，没解决就会记着","不太认同，该复盘还是得复盘"]},
+    {q:"哪怕只是小事，也希望对方认真说一句「我懂你不舒服」", dim:2, dir:1, o:["特别需要，被接住比讲道理重要","挺需要的，一句就够","不太需要，把事解决就行","完全不需要，行动比话实在"]},
+
+    {q:"「想你」「爱你」这类话，说得多一点也不嫌腻", dim:3, dir:1, o:["越多越好，我就吃这套","挺喜欢的，日常说说挺甜","不太习惯，偶尔一次就够","完全不需要，心里知道就行"]},
+    {q:"纪念日生日这些，有没有仪式感我其实不太在意", dim:3, dir:-1, o:["完全不在意，平常日子就好","比较不在意，别太折腾","还是有点期待，简单过也行","挺在意的，会认真准备"]},
+    {q:"我愿意在社交平台公开我们的关系", dim:3, dir:1, o:["当然，恨不得人人都知道","愿意，正常发就好","不太爱发，但被提及不介意","不太愿意，感情是两个人的事"]},
+    {q:"礼物实用就好，不太需要讲究仪式和心思", dim:3, dir:-1, o:["很认同，能用得上最实在","比较认同，别太破费","有点不认同，还是想看到心意","不太认同，心思比实用重要"]},
+
+    {q:"异地得有个大致的结束时间，不然我会不安", dim:4, dir:1, o:["很需要，有个盼头才踏实","比较需要，有个方向就好","不太需要，走一步看一步","完全不需要，顺其自然就好"]},
+    {q:"为了结束异地，我愿意考虑换城市或换工作", dim:4, dir:1, o:["已经在想了，可以我来","愿意考虑，看机会再说","有点犹豫，牵扯太多","不太愿意，更希望维持现状"]},
+    {q:"聊未来规划时，我会很自然把对方算进去", dim:4, dir:1, o:["当然，几乎每个计划都有 TA","大体是，重要的会一起想","不太会，先想自己的","完全不会，各自规划更清楚"]},
+    {q:"见家长、结婚这些，顺其自然就好，不用急着定", dim:4, dir:-1, o:["很认同，到了那步自然水到渠成","比较认同，别给自己压力","有点不认同，还是想有个时间表","不太认同，我希望早点定下来"]},
+
+    {q:"和异性单独约见面前，我希望对方先跟我说一声", dim:5, dir:1, o:["会，这是基本的尊重","比较希望，说一声就踏实","不太需要，回来讲也行","完全不用，各自有分寸"]},
+    {q:"我不会想看对方手机，各自留点空间更舒服", dim:5, dir:-1, o:["完全不会，那是底线","基本不会，没必要","偶尔会有点好奇","坦白说，我会想看"]},
+    {q:"如果对方和前任还有联系，我希望自己是被提前告知的", dim:5, dir:1, o:["希望，别让我最后才知道","比较希望，说清楚就行","不太介意，知不知道都好","完全不介意，那是过去的事"]},
+    {q:"对方有不想说的事，我不会追问到底", dim:5, dir:-1, o:["不会，等 TA 想说再说","大体不会，问一次就够了","会多问两句，在意就想知道","会追问，藏着反而更不安"]}
+  ];
+
+  var DIMS = [
+    {name:"联系与空间", hi:"偏天天黏着", lo:"偏各自透气"},
+    {name:"冲突与沟通", hi:"偏当场讲开", lo:"偏缓一缓"},
+    {name:"表达与仪式", hi:"偏重表达",   lo:"偏轻形式"},
+    {name:"未来与承诺", hi:"偏早规划",   lo:"偏顺其自然"},
+    {name:"边界与信任", hi:"偏要确认",   lo:"偏给空间"}
+  ];
+
+  /* 档位只描述差异，不评判合不合 */
+  var LEVELS = [
+    {min:85, name:"同频得让人省心", tag:"很多事不用解释，就能想到一块去",
+      advice:"难得的是这份默契。也别因此默认对方永远和你一样——偶尔聊聊那少数不一样的地方，反而更稳。",
+      quote:"不用解释就懂，是攒出来的默契。"},
+    {min:70, name:"大体合拍，小处分着", tag:"大方向一致，少数地方各有各的习惯",
+      advice:"合得来的部分已经够多了。剩下那几处不同不用急着改，先说清楚各自为什么这么想就好。",
+      quote:"大方向一样，小处慢慢磨。"},
+    {min:55, name:"有得聊，也有得磨", tag:"有些想法挺一致，有些得慢慢对",
+      advice:"差异不等于不合。把「值得好好聊」那几题拿出来，一人一句说说理由，比猜对方怎么想省事得多。",
+      quote:"不一样不要紧，说开了就好。"},
+    {min:0,  name:"不太一样，反而互补", tag:"两个人看感情的方式差得挺多",
+      advice:"想法差得远，也能过得很好，前提是都知道对方在意什么。别急着说服，先听懂就赢了一半。",
+      quote:"听懂比说服更重要。"}
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function showView(v){
+    ['home','quiz','share','result'].forEach(function(k){ $(k).classList.toggle('hidden', k!==v); });
+    window.scrollTo(0,0);
+  }
+
+  /* ---------- 挑战链接：答案只写进 ?q=20位数字 ---------- */
+  function parsePeer(){
+    try{
+      var m = location.search.match(/[?&]q=([1-4]{20})(?:&|$)/);
+      if(m) return m[1].split('').map(Number);
+    }catch(e){}
+    return null;
+  }
+  function buildLink(){
+    return location.href.split('?')[0].split('#')[0] + '?q=' + answers.join('');
+  }
+  var peer = parsePeer();
+  var answers = [], idx = 0;
+
+  /* ---------- 首页 ---------- */
+  var dc = $('homeDims');
+  DIMS.forEach(function(d){ var s=document.createElement('span'); s.textContent=d.name; dc.appendChild(s); });
+  if(peer){
+    $('homeTitle').innerHTML = 'TA 已经答完了<br>轮到你了';
+    $('homeSub').innerHTML = '答同一套 20 题<br>答完直接看你们的契合度';
+    $('stepsCard').classList.add('hidden');
+    $('peerTip').classList.remove('hidden');
+    $('startBtn').textContent = '开始答题';
+  }
+  $('startBtn').onclick = function(){ start(); };
+
+  function start(){ answers = []; idx = 0; showView('quiz'); renderQ(); }
+
+  /* ---------- 答题 ---------- */
+  function renderQ(){
+    var q = QUIZ[idx];
+    $('prog').textContent = '第 ' + (idx+1) + ' / ' + QUIZ.length + ' 题';
+    $('qDim').textContent = DIMS[q.dim-1].name;
+    $('qIndex').textContent = 'QUESTION ' + (idx+1<10?'0'+(idx+1):(idx+1));
+    $('qText').textContent = q.q;
+    $('barFill').style.width = (idx / QUIZ.length * 100) + '%';
+    var ol = $('optList'); ol.innerHTML = '';
+    var labels = ['A','B','C','D'];
+    q.o.forEach(function(t, i){
+      var div = document.createElement('div');
+      div.className = 'opt';
+      div.innerHTML = '<span class="dot">'+labels[i]+'</span><span>'+esc(t)+'</span>';
+      div.onclick = function(){ choose(i+1); };
+      ol.appendChild(div);
+    });
+  }
+  function choose(v){
+    answers[idx] = v;
+    if(idx < QUIZ.length - 1){
+      idx++; $('barFill').style.width = (idx / QUIZ.length * 100) + '%'; renderQ();
+    } else {
+      $('barFill').style.width = '100%';
+      if(peer) showResult(); else showShare();
+    }
+  }
+  $('backBtn').onclick = function(){
+    if(idx === 0){ showView('home'); return; }
+    idx--; answers.pop(); renderQ();
+  };
+
+  /* ---------- 维度倾向（用于第一个人答完页） ----------
+     dir=1 题：A(1)→4 分（偏亲密）；dir=-1 题：A(1)→1 分（偏独立）。 */
+  function tendency(ans, dim){
+    var s = 0, n = 0;
+    QUIZ.forEach(function(q, i){
+      if(q.dim !== dim) return;
+      s += q.dir === 1 ? (5 - ans[i]) : ans[i];
+      n++;
+    });
+    var avg = s / n;
+    if(avg >= 3.2) return DIMS[dim-1].hi;
+    if(avg <= 1.8) return DIMS[dim-1].lo;
+    return '看情况';
+  }
+
+  function showShare(){
+    showView('share');
+    var tl = $('tendList'); tl.innerHTML = '';
+    DIMS.forEach(function(d, i){
+      var row = document.createElement('div');
+      row.className = 'tend-row';
+      row.innerHTML = '<span class="tend-name">'+esc(d.name)+'</span><span class="tend-val">'+esc(tendency(answers, i+1))+'</span>';
+      tl.appendChild(row);
+    });
+    $('linkBox').textContent = buildLink();
+    $('copyTip').textContent = '';
+  }
+  function fallbackCopy(txt){
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); $('copyTip').textContent = '已复制，发给 TA 吧'; }
+    catch(e){ $('copyTip').textContent = '请长按上方链接手动复制'; }
+    document.body.removeChild(ta);
+  }
+  $('copyBtn').onclick = function(){
+    var txt = $('linkBox').textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){ $('copyTip').textContent = '已复制，发给 TA 吧'; })
+        .catch(function(){ fallbackCopy(txt); });
+    } else { fallbackCopy(txt); }
+  };
+  $('againFromShare').onclick = function(){ showView('home'); };
+
+  /* ---------- 契合度 ---------- */
+  function calc(){
+    var diff = [], sum = 0;
+    for(var i=0; i<QUIZ.length; i++){
+      var d = Math.abs(answers[i] - peer[i]);
+      diff.push(d); sum += d;
+    }
+    var pct = Math.round((1 - sum / (3 * QUIZ.length)) * 100);
+    if(pct < 0) pct = 0; if(pct > 100) pct = 100;
+    var dimPct = [];
+    for(var k=1; k<=5; k++){
+      var s = 0, n = 0;
+      QUIZ.forEach(function(q, i){ if(q.dim === k){ s += diff[i]; n++; } });
+      dimPct.push(Math.round((1 - s / (3 * n)) * 100));
+    }
+    return {pct:pct, dimPct:dimPct, diff:diff};
+  }
+  function levelOf(p){
+    for(var i=0;i<LEVELS.length;i++){ if(p >= LEVELS[i].min) return LEVELS[i]; }
+    return LEVELS[LEVELS.length-1];
+  }
+  var CIRC = 2 * Math.PI * 79;
+
+  function cmpHTML(item){
+    var q = QUIZ[item.i];
+    var mine = q.o[answers[item.i]-1], theirs = q.o[peer[item.i]-1];
+    var line = item.d === 0 ? '你俩都选了「'+esc(mine)+'」'
+                            : '你：'+esc(mine)+'　/　TA：'+esc(theirs);
+    return '<div class="cmp-item"><div class="cmp-q">'+esc(q.q)+'</div><div class="cmp-a">'+line+'</div></div>';
+  }
+
+  function showResult(){
+    var r = calc(), L = levelOf(r.pct);
+    showView('result');
+    $('rName').textContent = L.name;
+    $('rTag').textContent = L.tag;
+    $('rAdvice').textContent = L.advice;
+    $('rQuote').textContent = '「' + L.quote + '」';
+
+    var db = $('dimBars'); db.innerHTML = '';
+    DIMS.forEach(function(d, i){
+      var row = document.createElement('div');
+      row.className = 'dim-bar-row';
+      row.innerHTML = '<span class="dim-bar-name">'+esc(d.name)+'</span>'+
+        '<span class="dim-bar-track"><i style="width:'+r.dimPct[i]+'%"></i></span>'+
+        '<span class="dim-bar-num">'+r.dimPct[i]+'%</span>';
+      db.appendChild(row);
+    });
+
+    var order = r.diff.map(function(d, i){ return {i:i, d:d}; });
+    var same = order.slice().sort(function(a,b){ return a.d - b.d; }).slice(0,3);
+    var apart = order.slice().sort(function(a,b){ return b.d - a.d; }).slice(0,3);
+    $('sameTitle').textContent = same[0].d === 0 ? '想到一块去的' : '最接近的';
+    $('sameList').innerHTML = same.map(cmpHTML).join('');
+    if(apart[0].d === 0){
+      $('diffTitle').textContent = '难得的一致';
+      $('diffList').innerHTML = '<div class="cmp-item"><div class="cmp-q">这 20 题没有明显分歧</div>'+
+        '<div class="cmp-a">也别因此省了聊天，偶尔对一对近况就好。</div></div>';
+    } else {
+      $('diffTitle').textContent = '值得好好聊的';
+      $('diffList').innerHTML = apart.map(cmpHTML).join('');
+    }
+
+    $('ringFill').setAttribute('stroke-dasharray', '0 ' + CIRC);
+    $('rPct').textContent = '0';
+    setTimeout(function(){
+      $('ringFill').setAttribute('stroke-dasharray', (r.pct/100*CIRC) + ' ' + CIRC);
+      var cur = 0, step = Math.max(1, Math.round(r.pct/40));
+      var timer = setInterval(function(){
+        cur += step; if(cur >= r.pct){ cur = r.pct; clearInterval(timer); }
+        $('rPct').textContent = cur;
+      }, 26);
+    }, 60);
+    $('againBtn').onclick = function(){
+      try{ history.replaceState(null, '', location.href.split('?')[0].split('#')[0]); }catch(e){}
+      peer = null;
+      $('homeTitle').innerHTML = '你们的感情观<br>合得来吗？';
+      $('homeSub').innerHTML = '20 道题，不评判对错<br>只看看两个人的想法差在哪';
+      $('stepsCard').classList.remove('hidden');
+      $('peerTip').classList.add('hidden');
+      $('startBtn').textContent = '开始测试';
+      showView('home');
+    };
+    $('shareBtn').onclick = function(){ shareCard(L, r); };
+  }
+
+  /* ---------- 保存结果图 ---------- */
+  function shareCard(L, r){
+    var cv = document.createElement('canvas');
+    var W = 1080, H = 1350; cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    var g = x.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,'#FFF3E2'); g.addColorStop(.48,'#FFE7EE'); g.addColorStop(1,'#FFF6E4');
+    x.fillStyle = g; x.fillRect(0,0,W,H);
+    [[.12,.08,.60,'255,186,120',.38],[.92,.22,.55,'255,158,190',.36],[.78,.96,.62,'255,214,120',.34]]
+      .forEach(function(b){
+        var rg = x.createRadialGradient(W*b[0],H*b[1],0,W*b[0],H*b[1],W*b[2]);
+        rg.addColorStop(0,'rgba('+b[3]+','+b[4]+')');
+        rg.addColorStop(1,'rgba('+b[3]+',0)');
+        x.fillStyle = rg; x.fillRect(0,0,W,H);
+      });
+    x.textAlign = 'center';
+    x.fillStyle = '#5C4A52'; x.font = '800 54px sans-serif';
+    x.fillText('感情观契合度测试', W/2, 120);
+    x.fillStyle = '#B08A4F'; x.font = '400 28px sans-serif';
+    x.fillText('两个人答同一套 20 题 · 不评判对错', W/2, 170);
+    x.fillStyle = '#C9A063'; x.font = '800 140px sans-serif';
+    x.fillText(r.pct + '%', W/2, 350);
+    x.fillStyle = '#9A8590'; x.font = '400 28px sans-serif';
+    x.fillText('你们的感情观契合度', W/2, 396);
+    x.fillStyle = '#5C4A52'; x.font = '800 58px sans-serif';
+    x.fillText(L.name, W/2, 500);
+    x.fillStyle = '#B08A4F'; x.font = '400 30px sans-serif';
+    x.fillText(L.tag, W/2, 548);
+    DIMS.forEach(function(d, i){
+      var y = 620 + i * 66;
+      x.textAlign = 'left'; x.fillStyle = '#5C4A52'; x.font = '400 28px sans-serif';
+      x.fillText(d.name, 100, y + 26);
+      x.fillStyle = '#F8DCE6'; roundRect(x, 350, y, 520, 22, 11); x.fill();
+      x.fillStyle = '#C9A063'; roundRect(x, 350, y, 520 * r.dimPct[i] / 100, 22, 11); x.fill();
+      x.textAlign = 'right'; x.fillStyle = '#B08A4F'; x.font = '700 28px sans-serif';
+      x.fillText(r.dimPct[i] + '%', 960, y + 26);
+    });
+    x.textAlign = 'center';
+    x.fillStyle = '#FCEEF3'; roundRect(x, 90, 980, W-180, 180, 24); x.fill();
+    x.strokeStyle = '#E8D3A8'; x.lineWidth = 2; roundRect(x, 90, 980, W-180, 180, 24); x.stroke();
+    x.fillStyle = '#5C4A52'; x.font = '700 40px sans-serif';
+    wrapText(x, '「' + L.quote + '」', W/2, 1075, W-260, 54);
+    x.fillStyle = '#9A8590'; x.font = '400 28px sans-serif';
+    x.fillText('合得来是运气，聊得开是本事', W/2, H-110);
+    x.fillText('长按保存图片 · 感情观契合度测试', W/2, H-64);
+    x.textAlign = 'right';
+    x.fillStyle = 'rgba(176,138,79,.75)'; x.font = '400 24px sans-serif';
+    x.fillText('小红书@异地恋快快走', W-80, H-24);
+    try{
+      var url = cv.toDataURL('image/png');
+      var a = document.createElement('a'); a.href = url; a.download = '感情观契合度.png'; a.click();
+    }catch(e){ alert('保存失败，请截图当前页面结果。'); }
+  }
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath(); ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+  function wrapText(ctx, text, cx, y, maxW, lh){
+    var line = '';
+    for(var i=0;i<text.length;i++){
+      var t = line + text[i];
+      if(ctx.measureText(t).width > maxW && line){ ctx.fillText(line, cx, y); line = text[i]; y += lh; }
+      else { line = t; }
+    }
+    if(line) ctx.fillText(line, cx, y);
+  }
+
+  showView('home');
+</script>
+</body>
+</html>
